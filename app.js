@@ -10,6 +10,8 @@ const {open} = require('sqlite')
 
 app.use(express.json())
 
+module.export = express
+
 const sqlite3 = require('sqlite3')
 
 let database = null
@@ -75,15 +77,44 @@ app.post('/players/', async (request, response) => {
 })
 
 //API 3
+app.put('/players/:playerId/', async (request, response) => {
+  const {playerId} = request.params
+  const playerDetails = request.body
+
+  const {player_name, jersey_number, role} = playerDetails
+
+  const udpatePlayerQuery = `
+  UPDATE cricket_team SET player_name='${player_name}',
+  jersey_number=${jersey_number},
+  role='${role}'
+  WHERE player_id =${playerId};
+  `
+  await database.run(udpatePlayerQuery)
+
+  response.send('Player Details Updated')
+})
+
+//API 4
 app.get('/players/:playerId/', async (request, response) => {
-  const playerId = request.params
+  const {playerId} = request.params
 
   const playerQuery = `
     
-    SELECT * FROM cricket_team  WHERE player_id=${playerId}
-    `
+    SELECT * FROM cricket_team  WHERE player_id = ${playerId}`
 
   const player = await database.get(playerQuery)
 
   response.send(player)
+})
+
+//API 5
+app.delete('/players/:playerId/', async (request, response) => {
+  const {playerId} = request.params
+
+  const playerQuery = `
+    
+    DELETE FROM cricket_team  WHERE player_id = ${playerId}`
+
+  await database.get(playerQuery)
+  response.send('Player Removed')
 })
